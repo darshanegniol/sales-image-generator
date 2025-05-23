@@ -411,7 +411,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Font loader with specified size
-# Font loader with specified size
 def load_font(size):
     try:
         return ImageFont.truetype("fonts/RobotoCondensed-Bold.ttf", size)
@@ -766,7 +765,7 @@ with st.container():
         # Generate and display preview
         try:
             preview_image = generate_image(image_type, st.session_state.data)
-            st.image(preview_image, caption=f"Preview of {image_type} Image", use_column_width=True)
+            st.image(preview_image, caption=f"Preview of {image_type} Image", use_container_width=True)
         except Exception as e:
             st.warning("Unable to generate preview. Please ensure all images are available.")
         st.markdown("---")
