@@ -169,10 +169,10 @@ positions_today = {
         "percent": (1460, 1007, 30)
     },
     "total": {
-        "today_target": (650, 1166, 40),
-        "cases": (940, 1166, 36),
-        "revenue": (1190, 1166, 40),
-        "percent": (1460, 1169, 30)
+        "today_target": (650, 1160, 40),
+        "cases": (940, 1160, 36),
+        "revenue": (1190, 1160, 40),
+        "percent": (1460, 1163, 30)
     }
 }
 
