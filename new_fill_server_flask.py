@@ -137,21 +137,21 @@ positions_till_time = {
         "target": (759, 768, 36),
         "cases": (1010, 768, 34),
         "till_date_ach": (1232, 768, 36),
-        "percent": (1460, 778, 32)
+        "percent": (1460, 773, 32)
     },
     "row2": {
         "total": (550, 1000, 34),
         "target": (759, 1000, 36),
         "cases": (1010, 1000, 34),
         "till_date_ach": (1232, 1000, 36),
-        "percent": (1460, 1010, 32)
+        "percent": (1460, 1005, 32)
     },
     "total": {
         "total": (550, 1155, 34),
         "target": (759, 1155, 36),
         "cases": (1010, 1155, 34),
         "till_date_ach": (1232, 1155, 36),
-        "percent": (1460, 1165, 32)
+        "percent": (1460, 1160, 32)
     }
 }
 
@@ -160,19 +160,19 @@ positions_today = {
         "today_target": (650, 768, 44),
         "cases": (940, 768, 40),
         "revenue": (1190, 768, 44),
-        "percent": (1460, 768, 32)
+        "percent": (1460, 772, 32)
     },
     "row2": {
         "today_target": (650, 1000, 44),
         "cases": (940, 1000, 40),
         "revenue": (1190, 1000, 44),
-        "percent": (1460, 1000, 32)
+        "percent": (1460, 1005, 32)
     },
     "total": {
         "today_target": (650, 1155, 44),
         "cases": (940, 1155, 40),
         "revenue": (1190, 1155, 44),
-        "percent": (1460, 1155, 32)
+        "percent": (1460, 1160, 32)
     }
 }
 
