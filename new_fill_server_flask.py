@@ -312,11 +312,21 @@ with st.container():
             st.markdown("---")
 
         # Auto-calculate totals for the "Total" row
+        # Auto-calculate totals for the "Total" row
         try:
             if is_till_time:
-                total_total = int(float(st.session_state.data["row1"]["total"].replace(",", "")) + float(st.session_state.data["row2"]["total"].replace(",", "")))
-                total_target = int(float(st.session_state.data["row1"]["target"].replace(",", "")) + float(st.session_state.data["row2"]["target"].replace(",", "")))
-                total_till_date_ach = int(float(st.session_state.data["row1"]["till_date_ach"].replace(",", "")) + float(st.session_state.data["row2"]["till_date_ach"].replace(",", "")))
+                # Clean inputs by removing ₹ and commas
+                total1 = float(st.session_state.data["row1"]["total"].replace("₹", "").replace(",", "").strip())
+                total2 = float(st.session_state.data["row2"]["total"].replace("₹", "").replace(",", "").strip())
+                target1 = float(st.session_state.data["row1"]["target"].replace("₹", "").replace(",", "").strip())
+                target2 = float(st.session_state.data["row2"]["target"].replace("₹", "").replace(",", "").strip())
+                till_date_ach1 = float(st.session_state.data["row1"]["till_date_ach"].replace("₹", "").replace(",", "").strip())
+                till_date_ach2 = float(st.session_state.data["row2"]["till_date_ach"].replace("₹", "").replace(",", "").strip())
+        
+                total_total = int(total1 + total2)
+                total_target = int(target1 + target2)
+                total_till_date_ach = int(till_date_ach1 + till_date_ach2)
+        
                 st.session_state.data["total"]["total"] = str(total_total)
                 st.session_state.data["total"]["target"] = str(total_target)
                 st.session_state.data["total"]["today_target"] = ""
@@ -324,12 +334,19 @@ with st.container():
                 st.session_state.data["total"]["revenue"] = ""
                 # Calculate total percentage for Till Time
                 st.session_state.data["total"]["percent"] = calculate_percentage(
-                    st.session_state.data["total"]["till_date_ach"],
-                    st.session_state.data["total"]["target"]
+                    str(total_till_date_ach),  # Pass as string since calculate_percentage expects string input
+                    str(total_target)
                 )
             else:
-                total_today_target = int(float(st.session_state.data["row1"]["today_target"].replace(",", "")) + float(st.session_state.data["row2"]["today_target"].replace(",", "")))
-                total_revenue = int(float(st.session_state.data["row1"]["revenue"].replace(",", "")) + float(st.session_state.data["row2"]["revenue"].replace(",", "")))
+                # Clean inputs by removing ₹ and commas
+                today_target1 = float(st.session_state.data["row1"]["today_target"].replace("₹", "").replace(",", "").strip())
+                today_target2 = float(st.session_state.data["row2"]["today_target"].replace("₹", "").replace(",", "").strip())
+                revenue1 = float(st.session_state.data["row1"]["revenue"].replace("₹", "").replace(",", "").strip())
+                revenue2 = float(st.session_state.data["row2"]["revenue"].replace("₹", "").replace(",", "").strip())
+        
+                total_today_target = int(today_target1 + today_target2)
+                total_revenue = int(revenue1 + revenue2)
+        
                 st.session_state.data["total"]["total"] = ""
                 st.session_state.data["total"]["target"] = ""
                 st.session_state.data["total"]["today_target"] = str(total_today_target)
@@ -337,8 +354,8 @@ with st.container():
                 st.session_state.data["total"]["revenue"] = str(total_revenue)
                 # Calculate total percentage for Today
                 st.session_state.data["total"]["percent"] = calculate_percentage(
-                    st.session_state.data["total"]["revenue"],
-                    st.session_state.data["total"]["today_target"]
+                    str(total_revenue),  # Pass as string since calculate_percentage expects string input
+                    str(total_today_target)
                 )
         except (ValueError, AttributeError):
             # Reset total row if calculations fail
@@ -348,10 +365,12 @@ with st.container():
             st.session_state.data["total"]["till_date_ach"] = ""
             st.session_state.data["total"]["revenue"] = ""
             st.session_state.data["total"]["percent"] = ""
-
+        
         # Update total row cases
         try:
-            total_cases = int(float(st.session_state.data["row1"]["cases"].replace(",", "")) + float(st.session_state.data["row2"]["cases"].replace(",", "")))
+            cases1 = float(st.session_state.data["row1"]["cases"].replace("₹", "").replace(",", "").strip())
+            cases2 = float(st.session_state.data["row2"]["cases"].replace("₹", "").replace(",", "").strip())
+            total_cases = int(cases1 + cases2)
             st.session_state.data["total"]["cases"] = str(total_cases)
         except (ValueError, AttributeError):
             st.session_state.data["total"]["cases"] = ""
