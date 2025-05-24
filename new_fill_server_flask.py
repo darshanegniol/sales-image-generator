@@ -102,7 +102,7 @@ def generate_image(image_type, data):
             font = load_font(font_size)
             if key in ["target", "today_target", "till_date_ach", "revenue"]:
                 formatted_value = format_indian_number(data[row][key])
-                text = f"₹{formatted_value}" if data[row][key] else ""
+                text = f"{formatted_value}" if data[row][key] else ""
             elif key == "percent":
                 text = f"{data[row][key]}%" if data[row][key] else ""
             else:
@@ -125,24 +125,24 @@ def generate_image(image_type, data):
 # --- Coordinates for Image Text Placement ---
 positions_till_time = {
     "row1": {
-        "total": (550, 768, 40),
-        "target": (759, 768, 44),
-        "cases": (1010, 768, 40),
-        "till_date_ach": (1232, 768, 44),
+        "total": (550, 768, 34),
+        "target": (759, 768, 38),
+        "cases": (1010, 768, 34),
+        "till_date_ach": (1232, 768, 38),
         "percent": (1460, 778, 32)
     },
     "row2": {
-        "total": (550, 1000, 40),
-        "target": (759, 1000, 44),
-        "cases": (1010, 1000, 40),
-        "till_date_ach": (1232, 1000, 44),
+        "total": (550, 1000, 34),
+        "target": (759, 1000, 38),
+        "cases": (1010, 1000, 34),
+        "till_date_ach": (1232, 1000, 38),
         "percent": (1460, 1010, 32)
     },
     "total": {
-        "total": (550, 1155, 40),
-        "target": (759, 1155, 44),
-        "cases": (1010, 1155, 40),
-        "till_date_ach": (1232, 1155, 44),
+        "total": (550, 1155, 34),
+        "target": (759, 1155, 38),
+        "cases": (1010, 1155, 34),
+        "till_date_ach": (1232, 1155, 38),
         "percent": (1460, 1165, 32)
     }
 }
