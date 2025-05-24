@@ -349,6 +349,7 @@ with st.container():
             st.session_state.data["total"]["cases"] = ""
 
         # Download Button
+        # Download Button
         if st.button(
             "Generate and Download Image",
             key="download_button",
@@ -359,13 +360,13 @@ with st.container():
             if is_till_time:
                 required_keys.extend(["total", "target", "till_date_ach"])
             else:
-                required_keys.extend(["today_target", "revenue"])
+                required_keys.extend(["today_target", "revenue"])       
 
             all_filled = all(
                 st.session_state.data[row][key]
-                for row in st.session_state.data.values()
+                for row in st.session_state.data.keys()  # Changed from .values() to .keys()
                 for key in required_keys
-            )
+            )       
 
             if not all_filled:
                 st.error("Please fill in all required fields before generating the image.")
