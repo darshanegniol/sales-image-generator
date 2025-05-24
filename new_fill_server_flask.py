@@ -98,20 +98,18 @@ def generate_image(image_type, data):
     text_color = (245, 254, 220)  # RGB color for all text
 
     for row, cols in positions.items():
-        
         for key, (x, y, font_size) in cols.items():
             font = load_font(font_size)
             if key in ["target", "today_target", "till_date_ach", "revenue"]:
-                # Get the raw value
                 raw_value = data[row][key]
                 if not raw_value:
                     text = ""
                 else:
-                    # Strip currency symbol (₹) and any commas
+                    # Strip currency symbol (₹) and commas if present
                     cleaned_value = raw_value.replace("₹", "").replace(",", "").strip()
-                    # Format the cleaned number in Indian style
+                    # Format the number in Indian style
                     formatted_value = format_indian_number(cleaned_value)
-                    # Add the currency symbol back
+                    # Always add the ₹ symbol, whether user included it or not
                     text = f"₹{formatted_value}" if formatted_value else ""
             elif key == "percent":
                 text = f"{data[row][key]}%" if data[row][key] else ""
@@ -136,23 +134,23 @@ def generate_image(image_type, data):
 positions_till_time = {
     "row1": {
         "total": (550, 768, 34),
-        "target": (759, 768, 38),
+        "target": (759, 768, 36),
         "cases": (1010, 768, 34),
-        "till_date_ach": (1232, 768, 38),
+        "till_date_ach": (1232, 768, 36),
         "percent": (1460, 778, 32)
     },
     "row2": {
         "total": (550, 1000, 34),
-        "target": (759, 1000, 38),
+        "target": (759, 1000, 36),
         "cases": (1010, 1000, 34),
-        "till_date_ach": (1232, 1000, 38),
+        "till_date_ach": (1232, 1000, 36),
         "percent": (1460, 1010, 32)
     },
     "total": {
         "total": (550, 1155, 34),
-        "target": (759, 1155, 38),
+        "target": (759, 1155, 36),
         "cases": (1010, 1155, 34),
-        "till_date_ach": (1232, 1155, 38),
+        "till_date_ach": (1232, 1155, 36),
         "percent": (1460, 1165, 32)
     }
 }
