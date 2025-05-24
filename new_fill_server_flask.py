@@ -136,14 +136,14 @@ positions_till_time = {
         "target": (759, 1000, 44),
         "cases": (1010, 1000, 40),
         "till_date_ach": (1232, 1000, 44),
-        "percent": (1460, 1000, 32)
+        "percent": (1460, 1010, 32)
     },
     "total": {
         "total": (550, 1155, 40),
         "target": (759, 1155, 44),
         "cases": (1010, 1155, 40),
         "till_date_ach": (1232, 1155, 44),
-        "percent": (1460, 1155, 32)
+        "percent": (1460, 1165, 32)
     }
 }
 
