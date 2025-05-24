@@ -657,6 +657,7 @@ with st.container():
     # Input Forms for Each Row
     rows = ["row1", "row2", "total"]
     is_till_time = image_type == "Till Time"
+    valid_region_images = ["None", "SRIRAM JOSHI.png", "BHAVIK GANATRA.png"]
     
     for row in rows:
         st.markdown(f"#### Enter Data for {row.capitalize()}")
