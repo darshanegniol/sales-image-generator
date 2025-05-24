@@ -439,6 +439,8 @@
 
 
 
+# Paste this entire code in your Streamlit app
+
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import io
@@ -462,7 +464,6 @@ st.markdown("""
 
 # --- Helper Functions ---
 def load_font(size):
-    """Load a sharp font (Roboto Condensed Bold) with fallbacks."""
     try:
         return ImageFont.truetype("fonts/RobotoCondensed-Bold.ttf", size)
     except:
@@ -472,7 +473,6 @@ def load_font(size):
             return ImageFont.load_default()
 
 def format_indian_number(number_str):
-    """Format numbers in Indian style (e.g., 12,34,56,789)."""
     try:
         num = int(float(number_str.replace(",", "")))
         num_str = str(num)
@@ -488,9 +488,7 @@ def format_indian_number(number_str):
         return number_str
 
 def calculate_percentage(achieved, target):
-    """Calculate percentage of achieved vs target."""
     try:
-        # Strip currency symbol (₹), commas, and whitespace
         achieved_cleaned = achieved.replace("₹", "").replace(",", "").strip()
         target_cleaned = target.replace("₹", "").replace(",", "").strip()
         achieved_num = float(achieved_cleaned)
@@ -500,19 +498,16 @@ def calculate_percentage(achieved, target):
         return ""
 
 def resize_image_contain(image, target_size):
-    """Resize image while maintaining aspect ratio (contain style)."""
     target_width, target_height = target_size
     img_width, img_height = image.size
     aspect_ratio = img_width / img_height
     target_aspect = target_width / target_height
-
     if aspect_ratio > target_aspect:
         new_width = target_width
         new_height = int(new_width / aspect_ratio)
     else:
         new_height = target_height
         new_width = int(new_height * aspect_ratio)
-
     image = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
     new_image = Image.new("RGBA", target_size, (0, 0, 0, 0))
     paste_x = (target_width - new_width) // 2
@@ -520,12 +515,25 @@ def resize_image_contain(image, target_size):
     new_image.paste(image, (paste_x, paste_y))
     return new_image
 
+def autofill_fields_from_paste(pasted_text, row, is_till_time):
+    try:
+        values = pasted_text.split("\t")
+        values = [v.strip() for v in values]
+        if is_till_time and len(values) >= 4:
+            st.session_state.data[row]["total"] = values[0]
+            st.session_state.data[row]["target"] = values[1]
+            st.session_state.data[row]["cases"] = values[2]
+            st.session_state.data[row]["till_date_ach"] = values[3]
+        elif not is_till_time and len(values) >= 3:
+            st.session_state.data[row]["today_target"] = values[0]
+            st.session_state.data[row]["cases"] = values[1]
+            st.session_state.data[row]["revenue"] = values[2]
+    except Exception as e:
+        st.warning(f"Error processing pasted data for {row}: {e}")
+
 def generate_image(image_type, data):
-    """Generate the filled image based on user inputs."""
     image = Image.open("ACTUAL_REGION_REVENUE_blank.jpg" if image_type == "Till Time" else "today.jpg")
     draw = ImageDraw.Draw(image)
-
-    # Paste region images for row1 and row2
     for row, (x, y, font_size) in region_positions.items():
         region_image_path = data[row]["region_image"]
         if region_image_path != "None":
@@ -539,42 +547,30 @@ def generate_image(image_type, data):
                 st.warning(f"Failed to load region image for {row}. Proceeding without it.")
 
     positions = positions_till_time if image_type == "Till Time" else positions_today
-    text_color = (245, 254, 220)  # RGB color for all text
-
+    text_color = (245, 254, 220)
     for row, cols in positions.items():
         for key, (x, y, font_size) in cols.items():
             font = load_font(font_size)
             if key in ["target", "today_target", "till_date_ach", "revenue"]:
                 raw_value = data[row][key]
-                if not raw_value:
-                    text = ""
-                else:
-                    # Strip currency symbol (₹) and commas if present
-                    cleaned_value = raw_value.replace("₹", "").replace(",", "").strip()
-                    # Format the number in Indian style
-                    formatted_value = format_indian_number(cleaned_value)
-                    # Always add the ₹ symbol, whether user included it or not
-                    text = f"₹{formatted_value}" if formatted_value else ""
+                cleaned_value = raw_value.replace("₹", "").replace(",", "").strip()
+                formatted_value = format_indian_number(cleaned_value)
+                text = f"₹{formatted_value}" if formatted_value else ""
             elif key == "percent":
                 text = f"{data[row][key]}%" if data[row][key] else ""
             else:
                 text = data[row][key]
-
             if not text:
                 continue
-
             try:
                 text_bbox = draw.textbbox((0, 0), text, font=font)
                 text_width = text_bbox[2] - text_bbox[0]
             except AttributeError:
                 text_width = draw.textsize(text, font=font)[0]
-
             centered_x = x - (text_width // 2)
             draw.text((centered_x, y), text, fill=text_color, font=font)
-
     return image
 
-# --- Coordinates for Image Text Placement ---
 positions_till_time = {
     "row1": {
         "total": (550, 768, 34),
@@ -625,289 +621,155 @@ region_positions = {
     "row2": (-185, 935, 46)
 }
 
-# --- Initialize Session State ---
 if "data" not in st.session_state:
     st.session_state.data = {
-        "row1": {
-            "region_image": "None", "total": "", "target": "", "today_target": "", "cases": "", "till_date_ach": "", "revenue": "", "percent": ""
-        },
-        "row2": {
-            "region_image": "None", "total": "", "target": "", "today_target": "", "cases": "", "till_date_ach": "", "revenue": "", "percent": ""
-        },
-        "total": {
-            "total": "", "target": "", "today_target": "", "cases": "", "till_date_ach": "", "revenue": "", "percent": ""
-        }
+        "row1": {"region_image": "None", "total": "", "target": "", "today_target": "", "cases": "", "till_date_ach": "", "revenue": "", "percent": ""},
+        "row2": {"region_image": "None", "total": "", "target": "", "today_target": "", "cases": "", "till_date_ach": "", "revenue": "", "percent": ""},
+        "total": {"total": "", "target": "", "today_target": "", "cases": "", "till_date_ach": "", "revenue": "", "percent": ""}
     }
 
-# --- Main Layout ---
 with st.container():
     col1, col2 = st.columns([2, 1], gap="large")
-
     with col1:
-        # Image Type Selection
         st.markdown("#### Select Image Type")
-        image_type = st.selectbox(
-            "",
-            ["Till Time", "Today"],
-            key="image_type",
-            help="Choose whether to generate a Till Time or Today image"
-        )
+        image_type = st.selectbox("", ["Till Time", "Today"], key="image_type")
         st.markdown("---")
 
-    # Input Forms for Each Row
-    rows = ["row1", "row2", "total"]
-    is_till_time = image_type == "Till Time"
-    valid_region_images = ["None", "SRIRAM JOSHI.png", "BHAVIK GANATRA.png"]
-    
-    for row in rows:
-        st.markdown(f"#### Enter Data for {row.capitalize()}")
-        with st.container():
-            cols = st.columns([2, 2, 2, 2, 2])
-    
-            # Region Image (for row1 and row2 only)
-            if row in ["row1", "row2"]:
-                with cols[0]:
-                    st.session_state.data[row]["region_image"] = st.selectbox(
-                        f"Region Image ({row})",
-                        ["None", "SRIRAM JOSHI.png", "BHAVIK GANATRA.png"],
-                        index=["None", "SRIRAM JOSHI.png", "BHAVIK GANATRA.png"].index(st.session_state.data[row]["region_image"]),
-                        key=f"region_image_{row}",
-                        help="Select an image for the region"
-                    )
-    
-            # First field: Total (Till Time) or Today's Target (Today)
-            with cols[1]:
-                if is_till_time and row != "total":
-                    first_field_input = st.text_input(
-                        f"Total ({row})",
-                        value=st.session_state.data[row]["total"],
-                        placeholder="Enter Total (or paste all values: total, target, cases, till_date_ach)",
-                        key=f"total_{row}"
-                    )
-                    # Check if the user pasted multiple values (tab, comma, or space separated)
-                    if "\t" in first_field_input:
-                        separator = "\t"  # Excel copy-paste uses tabs
-                    elif "," in first_field_input:
-                        separator = ","
-                    elif " " in first_field_input:
-                        separator = " "
-                    else:
-                        separator = None
-    
-                    if separator:
-                        values = [val.strip() for val in first_field_input.split(separator)]
-                        if len(values) >= 4:  # Expecting total, target, cases, till_date_ach
-                            st.session_state.data[row]["total"] = values[0]
-                            st.session_state.data[row]["target"] = values[1]
-                            st.session_state.data[row]["cases"] = values[2]
-                            st.session_state.data[row]["till_date_ach"] = values[3]
-                        else:
-                            st.session_state.data[row]["total"] = first_field_input
-                    else:
-                        st.session_state.data[row]["total"] = first_field_input
-                else:
-                    st.session_state.data[row]["total"] = ""
-    
-            with cols[2]:
-                if is_till_time:
-                    target_input = st.text_input(
-                        f"Target ({row})",
-                        value=st.session_state.data[row]["target"],
-                        placeholder="₹ Enter Target",
-                        key=f"target_{row}"
-                    )
-                    st.session_state.data[row]["target"] = target_input
-                    st.session_state.data[row]["today_target"] = ""
-                else:
-                    first_field_input = st.text_input(
-                        f"Today's Target ({row})",
-                        value=st.session_state.data[row]["today_target"],
-                        placeholder="₹ Enter Today Target (or paste all values: today_target, cases, revenue)",
-                        key=f"today_target_{row}"
-                    )
-                    # Check if the user pasted multiple values (tab, comma, or space separated)
-                    if "\t" in first_field_input:
-                        separator = "\t"  # Excel copy-paste uses tabs
-                    elif "," in first_field_input:
-                        separator = ","
-                    elif " " in first_field_input:
-                        separator = " "
-                    else:
-                        separator = None
-    
-                    if separator:
-                        values = [val.strip() for val in first_field_input.split(separator)]
-                        if len(values) >= 3:  # Expecting today_target, cases, revenue
-                            st.session_state.data[row]["today_target"] = values[0]
-                            st.session_state.data[row]["cases"] = values[1]
-                            st.session_state.data[row]["revenue"] = values[2]
-                        else:
-                            st.session_state.data[row]["today_target"] = first_field_input
-                    else:
-                        st.session_state.data[row]["today_target"] = first_field_input
-                    st.session_state.data[row]["target"] = ""
-    
-            # Cases (Count)
-            with cols[3]:
-                st.session_state.data[row]["cases"] = st.text_input(
-                    f"Count ({row})",
-                    value=st.session_state.data[row]["cases"],
-                    placeholder="Enter Count",
-                    key=f"cases_{row}"
-                )
-    
-            # Till Date Ach or Revenue
-            with cols[4]:
-                if is_till_time:
-                    till_date_ach_input = st.text_input(
-                        f"Till Date Ach ({row})",
-                        value=st.session_state.data[row]["till_date_ach"],
-                        placeholder="₹ Enter Till Date Ach",
-                        key=f"till_date_ach_{row}"
-                    )
-                    st.session_state.data[row]["till_date_ach"] = till_date_ach_input
-                    st.session_state.data[row]["revenue"] = ""
-                else:
-                    revenue_input = st.text_input(
-                        f"Revenue ({row})",
-                        value=st.session_state.data[row]["revenue"],
-                        placeholder="₹ Enter Revenue",
-                        key=f"revenue_{row}"
-                    )
-                    st.session_state.data[row]["revenue"] = revenue_input
-                    st.session_state.data[row]["till_date_ach"] = ""
-    
-            # Calculate percentage for row1 and row2
-            if row in ["row1", "row2"]:
-                if is_till_time:
-                    st.session_state.data[row]["percent"] = calculate_percentage(
-                        st.session_state.data[row]["till_date_ach"],
-                        st.session_state.data[row]["target"]
-                    )
-                else:
-                    st.session_state.data[row]["percent"] = calculate_percentage(
-                        st.session_state.data[row]["revenue"],
-                        st.session_state.data[row]["today_target"]
-                    )
-    
-            # Display percentage
-            st.markdown(f"**Percent ({row})**: {st.session_state.data[row]['percent']}%")
-    
-        st.markdown("---")
+        rows = ["row1", "row2", "total"]
+        is_till_time = image_type == "Till Time"
+        for row in rows:
+            st.markdown(f"#### Enter Data for {row.capitalize()}")
+            with st.container():
+                cols = st.columns([2, 2, 2, 2, 2])
 
-        # Auto-calculate totals for the "Total" row
+                if row in ["row1", "row2"]:
+                    with cols[0]:
+                        st.session_state.data[row]["region_image"] = st.selectbox(
+                            f"Region Image ({row})", ["None", "SRIRAM JOSHI.png", "BHAVIK GANATRA.png"],
+                            index=["None", "SRIRAM JOSHI.png", "BHAVIK GANATRA.png"].index(st.session_state.data[row]["region_image"]),
+                            key=f"region_image_{row}"
+                        )
+
+                with cols[1 if is_till_time else 2]:
+                    paste_input = st.text_input(
+                        f"{'Total' if is_till_time else 'Today\'s Target'} ({row})",
+                        value=st.session_state.data[row]["total"] if is_till_time else st.session_state.data[row]["today_target"],
+                        placeholder="Paste tab-separated values here",
+                        key=f"pasted_input_{row}"
+                    )
+                    autofill_fields_from_paste(paste_input, row, is_till_time)
+                    if is_till_time:
+                        st.session_state.data[row]["total"] = paste_input
+                    else:
+                        st.session_state.data[row]["today_target"] = paste_input
+
+                with cols[3]:
+                    st.session_state.data[row]["cases"] = st.text_input(
+                        f"Count ({row})",
+                        value=st.session_state.data[row]["cases"],
+                        placeholder="Enter Count",
+                        key=f"cases_{row}"
+                    )
+
+                with cols[4]:
+                    if is_till_time:
+                        st.session_state.data[row]["till_date_ach"] = st.text_input(
+                            f"Till Date Ach ({row})",
+                            value=st.session_state.data[row]["till_date_ach"],
+                            placeholder="₹ Enter Till Date Ach",
+                            key=f"till_date_ach_{row}"
+                        )
+                    else:
+                        st.session_state.data[row]["revenue"] = st.text_input(
+                            f"Revenue ({row})",
+                            value=st.session_state.data[row]["revenue"],
+                            placeholder="₹ Enter Revenue",
+                            key=f"revenue_{row}"
+                        )
+
+                if row in ["row1", "row2"]:
+                    if is_till_time:
+                        st.session_state.data[row]["percent"] = calculate_percentage(
+                            st.session_state.data[row]["till_date_ach"],
+                            st.session_state.data[row]["target"]
+                        )
+                    else:
+                        st.session_state.data[row]["percent"] = calculate_percentage(
+                            st.session_state.data[row]["revenue"],
+                            st.session_state.data[row]["today_target"]
+                        )
+
+                st.markdown(f"**Percent ({row})**: {st.session_state.data[row]['percent']}%")
+            st.markdown("---")
+
         try:
             if is_till_time:
-                # Clean inputs by removing ₹ and commas
                 total1 = float(st.session_state.data["row1"]["total"].replace("₹", "").replace(",", "").strip())
                 total2 = float(st.session_state.data["row2"]["total"].replace("₹", "").replace(",", "").strip())
                 target1 = float(st.session_state.data["row1"]["target"].replace("₹", "").replace(",", "").strip())
                 target2 = float(st.session_state.data["row2"]["target"].replace("₹", "").replace(",", "").strip())
-                till_date_ach1 = float(st.session_state.data["row1"]["till_date_ach"].replace("₹", "").replace(",", "").strip())
-                till_date_ach2 = float(st.session_state.data["row2"]["till_date_ach"].replace("₹", "").replace(",", "").strip())
-
-                total_total = int(total1 + total2)
-                total_target = int(target1 + target2)
-                total_till_date_ach = int(till_date_ach1 + till_date_ach2)
-
-                st.session_state.data["total"]["total"] = str(total_total)
-                st.session_state.data["total"]["target"] = str(total_target)
-                st.session_state.data["total"]["today_target"] = ""
-                st.session_state.data["total"]["till_date_ach"] = str(total_till_date_ach)
-                st.session_state.data["total"]["revenue"] = ""
-                # Calculate total percentage for Till Time
-                st.session_state.data["total"]["percent"] = calculate_percentage(
-                    str(total_till_date_ach),  # Pass as string since calculate_percentage expects string input
-                    str(total_target)
-                )
+                till1 = float(st.session_state.data["row1"]["till_date_ach"].replace("₹", "").replace(",", "").strip())
+                till2 = float(st.session_state.data["row2"]["till_date_ach"].replace("₹", "").replace(",", "").strip())
+                st.session_state.data["total"]["total"] = str(int(total1 + total2))
+                st.session_state.data["total"]["target"] = str(int(target1 + target2))
+                st.session_state.data["total"]["till_date_ach"] = str(int(till1 + till2))
+                st.session_state.data["total"]["percent"] = calculate_percentage(str(int(till1 + till2)), str(int(target1 + target2)))
             else:
-                # Clean inputs by removing ₹ and commas
-                today_target1 = float(st.session_state.data["row1"]["today_target"].replace("₹", "").replace(",", "").strip())
-                today_target2 = float(st.session_state.data["row2"]["today_target"].replace("₹", "").replace(",", "").strip())
-                revenue1 = float(st.session_state.data["row1"]["revenue"].replace("₹", "").replace(",", "").strip())
-                revenue2 = float(st.session_state.data["row2"]["revenue"].replace("₹", "").replace(",", "").strip())
-
-                total_today_target = int(today_target1 + today_target2)
-                total_revenue = int(revenue1 + revenue2)
-
-                st.session_state.data["total"]["total"] = ""
-                st.session_state.data["total"]["target"] = ""
-                st.session_state.data["total"]["today_target"] = str(total_today_target)
-                st.session_state.data["total"]["till_date_ach"] = ""
-                st.session_state.data["total"]["revenue"] = str(total_revenue)
-                # Calculate total percentage for Today
-                st.session_state.data["total"]["percent"] = calculate_percentage(
-                    str(total_revenue),  # Pass as string since calculate_percentage expects string input
-                    str(total_today_target)
-                )
-        except (ValueError, AttributeError):
-            # Reset total row if calculations fail
-            st.session_state.data["total"]["total"] = ""
-            st.session_state.data["total"]["target"] = ""
-            st.session_state.data["total"]["today_target"] = ""
-            st.session_state.data["total"]["till_date_ach"] = ""
-            st.session_state.data["total"]["revenue"] = ""
+                today1 = float(st.session_state.data["row1"]["today_target"].replace("₹", "").replace(",", "").strip())
+                today2 = float(st.session_state.data["row2"]["today_target"].replace("₹", "").replace(",", "").strip())
+                rev1 = float(st.session_state.data["row1"]["revenue"].replace("₹", "").replace(",", "").strip())
+                rev2 = float(st.session_state.data["row2"]["revenue"].replace("₹", "").replace(",", "").strip())
+                st.session_state.data["total"]["today_target"] = str(int(today1 + today2))
+                st.session_state.data["total"]["revenue"] = str(int(rev1 + rev2))
+                st.session_state.data["total"]["percent"] = calculate_percentage(str(int(rev1 + rev2)), str(int(today1 + today2)))
+        except:
             st.session_state.data["total"]["percent"] = ""
 
-        # Update total row cases
         try:
-            cases1 = float(st.session_state.data["row1"]["cases"].replace("₹", "").replace(",", "").strip())
-            cases2 = float(st.session_state.data["row2"]["cases"].replace("₹", "").replace(",", "").strip())
-            total_cases = int(cases1 + cases2)
-            st.session_state.data["total"]["cases"] = str(total_cases)
-        except (ValueError, AttributeError):
+            case1 = float(st.session_state.data["row1"]["cases"].replace("₹", "").replace(",", "").strip())
+            case2 = float(st.session_state.data["row2"]["cases"].replace("₹", "").replace(",", "").strip())
+            st.session_state.data["total"]["cases"] = str(int(case1 + case2))
+        except:
             st.session_state.data["total"]["cases"] = ""
 
-        # Download Button
-        if st.button(
-            "Generate and Download Image",
-            key="download_button",
-            help="Generate and download the filled image",
-            use_container_width=True
-        ):
+        if st.button("Generate and Download Image", use_container_width=True):
             required_keys = ["cases"]
             if is_till_time:
                 required_keys.extend(["total", "target", "till_date_ach"])
             else:
                 required_keys.extend(["today_target", "revenue"])
-
             all_filled = all(
                 st.session_state.data[row][key]
-                for row in st.session_state.data.keys()  # Changed from .values() to .keys()
+                for row in st.session_state.data.keys()
                 for key in required_keys
             )
-
             if not all_filled:
                 st.error("Please fill in all required fields before generating the image.")
             else:
-                filled_image = generate_image(image_type, st.session_state.data)
-                img_byte_arr = io.BytesIO()
-                filled_image.save(img_byte_arr, format='JPEG')
-                img_byte_arr = img_byte_arr.getvalue()
+                img = generate_image(image_type, st.session_state.data)
+                img_bytes = io.BytesIO()
+                img.save(img_bytes, format='JPEG')
+                img_bytes = img_bytes.getvalue()
                 st.download_button(
-                    label="Download Filled Image",
-                    data=img_byte_arr,
+                    "Download Filled Image",
+                    data=img_bytes,
                     file_name=f"sales_team_{image_type.lower().replace(' ', '_')}_filled.jpg",
                     mime="image/jpeg",
-                    key="download_image_button",
                     use_container_width=True
                 )
-                st.success("Image generated! Click the button above to download.")
+                st.success("Image generated! Click to download.")
 
     with col2:
         st.markdown("#### Image Preview")
         try:
-            preview_image = generate_image(image_type, st.session_state.data)
-            st.image(preview_image, caption=f"Preview of {image_type} Image", use_container_width=True)
-        except Exception as e:
-            st.warning("Unable to generate preview. Please ensure all images are available.")
+            preview = generate_image(image_type, st.session_state.data)
+            st.image(preview, caption=f"Preview of {image_type} Image", use_container_width=True)
+        except:
+            st.warning("Unable to generate preview. Check image paths or input data.")
         st.markdown("---")
-        st.markdown(
-            "<p style='text-align: center; color: #566573;'>Preview updates automatically as you enter data</p>",
-            unsafe_allow_html=True
-        )
+        st.markdown("<p style='text-align: center; color: #566573;'>Preview updates automatically as you enter data</p>", unsafe_allow_html=True)
 
-# --- Footer ---
+# Footer
 st.markdown("""
     <hr style='margin-top: 50px;'>
     <p style='text-align: center; color: #566573;'>
