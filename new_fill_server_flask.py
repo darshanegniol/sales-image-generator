@@ -98,11 +98,21 @@ def generate_image(image_type, data):
     text_color = (245, 254, 220)  # RGB color for all text
 
     for row, cols in positions.items():
+        
         for key, (x, y, font_size) in cols.items():
             font = load_font(font_size)
             if key in ["target", "today_target", "till_date_ach", "revenue"]:
-                formatted_value = format_indian_number(data[row][key])
-                text = f"{formatted_value}" if data[row][key] else ""
+                # Get the raw value
+                raw_value = data[row][key]
+                if not raw_value:
+                    text = ""
+                else:
+                    # Strip currency symbol (₹) and any commas
+                    cleaned_value = raw_value.replace("₹", "").replace(",", "").strip()
+                    # Format the cleaned number in Indian style
+                    formatted_value = format_indian_number(cleaned_value)
+                    # Add the currency symbol back
+                    text = f"₹{formatted_value}" if formatted_value else ""
             elif key == "percent":
                 text = f"{data[row][key]}%" if data[row][key] else ""
             else:
