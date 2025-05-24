@@ -157,22 +157,22 @@ positions_till_time = {
 
 positions_today = {
     "row1": {
-        "today_target": (650, 771, 44),
-        "cases": (940, 771, 40),
-        "revenue": (1190, 771, 44),
-        "percent": (1460, 776, 32)
+        "today_target": (650, 771, 40),
+        "cases": (940, 771, 36),
+        "revenue": (1190, 771, 40),
+        "percent": (1460, 776, 30)
     },
     "row2": {
-        "today_target": (650, 1000, 44),
-        "cases": (940, 1000, 40),
-        "revenue": (1190, 1000, 44),
-        "percent": (1460, 1007, 32)
+        "today_target": (650, 1000, 40),
+        "cases": (940, 1000, 36),
+        "revenue": (1190, 1000, 40),
+        "percent": (1460, 1007, 30)
     },
     "total": {
-        "today_target": (650, 1166, 44),
-        "cases": (940, 1166, 40),
-        "revenue": (1190, 1166, 44),
-        "percent": (1460, 1169, 32)
+        "today_target": (650, 1166, 40),
+        "cases": (940, 1166, 36),
+        "revenue": (1190, 1166, 40),
+        "percent": (1460, 1169, 30)
     }
 }
 
