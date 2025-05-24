@@ -49,12 +49,15 @@ def format_indian_number(number_str):
 def calculate_percentage(achieved, target):
     """Calculate percentage of achieved vs target."""
     try:
-        achieved = float(achieved.replace(",", ""))
-        target = float(target.replace(",", ""))
-        return "0" if target == 0 else f"{(achieved / target * 100):.2f}"
+        # Strip currency symbol (₹), commas, and whitespace
+        achieved_cleaned = achieved.replace("₹", "").replace(",", "").strip()
+        target_cleaned = target.replace("₹", "").replace(",", "").strip()
+        achieved_num = float(achieved_cleaned)
+        target_num = float(target_cleaned)
+        return "0" if target_num == 0 else f"{(achieved_num / target_num * 100):.2f}"
     except (ValueError, AttributeError):
         return ""
-
+    
 def resize_image_contain(image, target_size):
     """Resize image while maintaining aspect ratio (contain style)."""
     target_width, target_height = target_size
